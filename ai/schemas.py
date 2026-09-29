@@ -1,34 +1,32 @@
-from enum import Enum
-from typing import List, Optional
 from pydantic import BaseModel, Field
+from typing import List, Optional, Dict, Any
 
-class TransportMode(str, Enum):
-    WALK = "walk"
-    CAR = "car"
-    PUBLIC = "public"
-
-class Location(BaseModel):
-    id: str
-    name: str
-    lat: float
-    lng: float
-    category: str  # 예: "food", "attraction", "cafe"
-    visit_duration: int  # 권장 체류 시간 (분 단위)
-    open_time: int = 0   # 영업 시작 시간 (09:00 -> 540)
-    close_time: int = 1440  # 영업 종료 시간 (21:00 -> 1260)
-    cost: int = 0
-
-class PreferenceWeights(BaseModel):
-    food_score: int = Field(default=5, ge=1, le=5)       # 맛집 선호도 (1~5)
-    attraction_score: int = Field(default=4, ge=1, le=5) # 관광 선호도 (1~5)
-    cafe_score: int = Field(default=5, ge=1, le=5)       # 카페 선호도 (1~5)
+class LocationInput(BaseModel):
+    id: str = Field(..., description="장소 ID")
+    name: str = Field(..., description="장소명")
+    category: str = Field(..., description="카테고리 (RESTAURANT, CAFE, ATTRACTION, CAFE_BAKERY, EXPERIENCE 등)")
+    latitude: float = Field(..., description="위도")
+    longitude: float = Field(..., description="경도")
+    rank: Optional[int] = Field(None, description="한국관광 데이터랩 맛집/관광지 순위 (1~50위, 없으면 None)")
 
 class TravelRequest(BaseModel):
-    start_location: Location
-    end_location: Optional[Location] = None
-    candidate_locations: List[Location]
-    start_time: int = 540   # 일정 시작 (09:00 -> 540분)
-    end_time: int = 1260   # 일정 종료 (21:00 -> 1260분)
-    transport_mode: TransportMode = TransportMode.PUBLIC
-    max_budget: int = 500000  # 예산 제한
-    weights: PreferenceWeights
+    start_time: str = Field("09:00", description="일정 시작 시각 (HH:MM)")
+    travel_mode: str = Field("CAR", description="이동 수단: CAR, TRANSIT, WALK")
+    weights: Dict[str, float] = Field(default_factory=dict, description="사용자 취향 가중치")
+    locations: List[LocationInput] = Field(..., description="방문 후보 장소 목록")
+    duration_matrix: Dict[str, Dict[str, int]] = Field(default_factory=dict, description="장소 간 이동시간 Matrix (분 단위)")
+
+class ScheduledItem(BaseModel):
+    location_id: str
+    location_name: str
+    category: str
+    arrival_time: str
+    wait_time_min: int
+    stay_duration_min: int
+    departure_time: str
+    estimated_rating: float
+
+class OptimizationResponse(BaseModel):
+    status: str = "SUCCESS"
+    total_duration_min: int
+    timeline: List[ScheduledItem]

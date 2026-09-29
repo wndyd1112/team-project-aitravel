@@ -1,47 +1,54 @@
-import math
 from typing import List, Tuple
-from schemas import TravelRequest, Location, PreferenceWeights
+from schemas import TravelRequest, LocationInput
 
 class CSPOptimizer:
     def __init__(self, request: TravelRequest):
         self.request = request
-        self.candidates = request.candidate_locations
-        self.weights = request.weights
 
-    def calculate_preference_score(self, location: Location) -> float:
-        """
-        [PPT 4p 반영] 카테고리별 취향 가중치를 반영한 점수 계산
-        - 맛집(food): food_score
-        - 관광(attraction): attraction_score
-        - 카페(cafe): cafe_score
-        """
-        category_map = {
-            "food": self.weights.food_score,
-            "attraction": self.weights.attraction_score,
-            "cafe": self.weights.cafe_score
-        }
-        # 기본 가중치 적용 (기본값 3.0)
-        base_weight = category_map.get(location.category.lower(), 3.0)
-        return float(base_weight)
+    def get_stay_duration(self, category: str) -> int:
+        cat = category.upper()
+        if "CAFE" in cat or "BAKERY" in cat:
+            return 45
+        elif "RESTAURANT" in cat or "FOOD" in cat:
+            return 60
+        elif "EXPERIENCE" in cat:
+            return 120
+        else:
+            return 90
 
-    def filter_and_rank_by_csp(self) -> List[Tuple[Location, float]]:
-        """
-        [CSP 1단계] 하드 제약조건 필터링 + 선호도 점수 정렬
-        - 1. 예산 제한 초과 장소 제외
-        - 2. 선호도 점수 높은 순으로 상위 후보지 추출
-        """
-        valid_candidates = []
-        current_budget_limit = self.request.max_budget
+    def calculate_wait_time(self, rank: int, visit_hour: int) -> int:
+        wait = 0
+        if rank:
+            if 1 <= rank <= 10:
+                wait += 30
+            elif 11 <= rank <= 20:
+                wait += 20
+            elif 21 <= rank <= 30:
+                wait += 10
+            elif 31 <= rank <= 50:
+                wait += 5
 
-        for loc in self.candidates:
-            # 1. 예산 제약조건 검사
-            if loc.cost > current_budget_limit:
-                continue
+        # 피크 타임 가중치 (점심: 12~13:30, 저녁: 17:30~19:30)
+        if visit_hour in [12, 13, 17, 18, 19]:
+            wait += 20
+        return wait
 
-            # 2. 취향 가중치 기반 점수 계산
-            score = self.calculate_preference_score(loc)
-            valid_candidates.append((loc, score))
+    def calculate_rating(self, rank: int) -> float:
+        if not rank:
+            return 3.5
+        if 1 <= rank <= 10:
+            return 4.8
+        elif 11 <= rank <= 30:
+            return 4.5
+        elif 31 <= rank <= 50:
+            return 4.0
+        return 3.5
 
-        # 점수가 높은 순으로 정렬
-        valid_candidates.sort(key=lambda x: x[1], reverse=True)
-        return valid_candidates
+    def filter_and_rank_by_csp(self) -> List[Tuple[LocationInput, float]]:
+        # 제약 조건 만족 및 기본 순위 정렬
+        ranked = []
+        for loc in self.request.locations:
+            score = 100.0 - (loc.rank if loc.rank else 51)
+            ranked.append((loc, score))
+        ranked.sort(key=lambda x: x[1], reverse=True)
+        return ranked
