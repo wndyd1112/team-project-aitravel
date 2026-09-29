@@ -1,18 +1,25 @@
 import { useState } from "react"
 import { Search, Bell, User, Menu, X } from "lucide-react"
 import Home from "./pages/Home"
+import Result from "./pages/Result"
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
+  // 1 = Home, 2 = Result
+  const [step, setStep] = useState(1)
+
+  // Home에서 입력한 여행 정보
+  const [travelData, setTravelData] = useState(null)
+
   return (
     <div className="min-h-screen bg-gray-100">
-      
+
       {/* 상단 헤더 */}
       <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-white border-b flex items-center justify-between px-6">
-        
+
         <div className="flex items-center gap-3">
-          
+
           {/* 메뉴 버튼 */}
           <button
             type="button"
@@ -33,11 +40,12 @@ function App() {
           </h1>
         </div>
 
-
         {/* 오른쪽 */}
         <div className="flex items-center gap-5">
+
           <div className="flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-2">
             <Search size={18} className="text-gray-500" />
+
             <input
               type="text"
               placeholder="Search..."
@@ -58,15 +66,16 @@ function App() {
               User
             </span>
           </div>
+
         </div>
       </header>
-
 
       {/* 사이드바 */}
       {isSidebarOpen && (
         <aside className="fixed left-0 top-16 z-50 h-[calc(100vh-4rem)] w-60 bg-white border-r p-4 shadow-lg">
-          
+
           <div className="mb-6 flex items-center justify-between">
+
             <p className="text-sm font-semibold text-gray-500">
               MENU
             </p>
@@ -79,32 +88,65 @@ function App() {
             >
               <X size={22} />
             </button>
-          </div>
 
+          </div>
 
           {/* 메뉴 */}
           <nav className="space-y-2">
-            <button className="w-full text-left px-4 py-3 rounded-lg bg-gray-100 font-medium">
+
+            {/* Home */}
+            <button
+              type="button"
+              onClick={() => {
+                setStep(1)
+                setIsSidebarOpen(false)
+              }}
+              className="w-full text-left px-4 py-3 rounded-lg bg-gray-100 font-medium"
+            >
               🏠 Home
             </button>
 
-            <button className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100">
+            <button
+              type="button"
+              className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100"
+            >
               📊 Dashboard
             </button>
 
-            <button className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100">
+            <button
+              type="button"
+              className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100"
+            >
               ⚙️ Settings
             </button>
+
           </nav>
 
         </aside>
       )}
 
-
       {/* 메인 */}
       <main className="flex-1 pt-16">
-  <Home />
-</main>
+
+        {/* Home */}
+        {step === 1 && (
+          <Home
+            onCreatePlan={(data) => {
+              setTravelData(data)
+              setStep(2)
+            }}
+          />
+        )}
+
+        {/* Result */}
+        {step === 2 && (
+          <Result
+            travelData={travelData}
+            onBack={() => setStep(1)}
+          />
+        )}
+
+      </main>
 
     </div>
   )

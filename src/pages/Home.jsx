@@ -16,7 +16,7 @@ import {
 } from "lucide-react"
 import "react-day-picker/style.css"
 
-function Home() {
+export default function Home({onCreatePlan}) {
   // =========================
   // 1단계 정보
   // =========================
@@ -147,7 +147,8 @@ function Home() {
     console.log("여행 인원:", people)
     console.log("여행 예산:", budget)
 
-    setIsSubmitted(true)
+    onCreatePlan({destination, startDate, endDate, styles, disliked, transport, people, budget})
+    
   }
 
   return (
@@ -739,5 +740,3 @@ function Home() {
     </main>
   )
 }
-
-export default Home
