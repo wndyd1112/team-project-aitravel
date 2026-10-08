@@ -23,155 +23,117 @@ import {
   Trees,
   Trash2,
   Plus,
+  X,
 } from "lucide-react"
 
 
-// --------------------------------------------------
-// 시간 재배정
-// 드래그해서 순서를 바꿨을 때 사용
-// --------------------------------------------------
-
-const updateTimes = (places) => {
-  const times = [
-    "09:00",
-    "11:00",
-    "13:00",
-    "15:30",
-    "17:30",
-    "19:00",
-  ]
-
-  return places.map((place, index) => ({
-    ...place,
-    time: times[index] || place.time,
-  }))
-}
-
-
-// --------------------------------------------------
+// ------------------------------------
 // 샘플 여행 일정
-// 실제로는 나중에 AI / 백엔드 데이터로 교체
-// --------------------------------------------------
+// ------------------------------------
 
 const samplePlan = [
   {
-    id: "day-1",
-    day: "DAY 1",
+    id: 1,
     date: "10월 3일",
     places: [
       {
         id: "place-1",
         time: "09:00",
         name: "부산 카페거리",
-        description:
-          "여행을 시작하며 여유롭게 아침을 즐겨보세요.",
-        type: "카페",
+        description: "분위기 좋은 카페에서 여유롭게 아침을 시작해보세요.",
+        category: "카페",
         icon: Coffee,
       },
       {
         id: "place-2",
         time: "11:00",
         name: "해운대 해수욕장",
-        description:
-          "부산을 대표하는 바다를 산책해보세요.",
-        type: "관광",
+        description: "부산을 대표하는 해변에서 바다를 즐겨보세요.",
+        category: "관광",
         icon: Landmark,
       },
       {
         id: "place-3",
         time: "13:00",
         name: "해운대 맛집",
-        description:
-          "부산의 대표적인 음식을 즐겨보세요.",
-        type: "맛집",
+        description: "부산의 대표적인 음식과 맛집을 즐겨보세요.",
+        category: "맛집",
         icon: Utensils,
       },
       {
         id: "place-4",
         time: "15:30",
         name: "동백섬",
-        description:
-          "바다를 따라 산책하며 자연을 즐겨보세요.",
-        type: "자연",
+        description: "해운대 주변의 아름다운 자연을 감상해보세요.",
+        category: "자연",
         icon: Trees,
       },
     ],
   },
-
   {
-    id: "day-2",
-    day: "DAY 2",
+    id: 2,
     date: "10월 4일",
     places: [
       {
         id: "place-5",
         time: "09:00",
         name: "감천문화마을",
-        description:
-          "알록달록한 골목과 부산의 풍경을 만나보세요.",
-        type: "관광",
+        description: "알록달록한 골목길과 예쁜 풍경을 만나보세요.",
+        category: "관광",
         icon: Landmark,
       },
       {
         id: "place-6",
         time: "12:00",
         name: "남포동 맛집",
-        description:
-          "부산의 다양한 먹거리를 즐겨보세요.",
-        type: "맛집",
+        description: "남포동에서 부산의 다양한 음식을 즐겨보세요.",
+        category: "맛집",
         icon: Utensils,
       },
       {
         id: "place-7",
         time: "14:00",
         name: "BIFF 광장",
-        description:
-          "부산의 영화와 문화를 느껴보세요.",
-        type: "관광",
+        description: "부산의 대표적인 번화가를 둘러보세요.",
+        category: "관광",
         icon: Landmark,
       },
       {
         id: "place-8",
         time: "17:00",
         name: "용두산공원",
-        description:
-          "부산 시내의 풍경을 감상해보세요.",
-        type: "자연",
+        description: "부산 시내를 한눈에 볼 수 있는 공원입니다.",
+        category: "자연",
         icon: Trees,
       },
     ],
   },
-
   {
-    id: "day-3",
-    day: "DAY 3",
+    id: 3,
     date: "10월 5일",
     places: [
       {
         id: "place-9",
         time: "09:00",
         name: "광안리 카페",
-        description:
-          "광안대교를 바라보며 여유로운 시간을 보내세요.",
-        type: "카페",
+        description: "광안대교를 바라보며 커피를 즐겨보세요.",
+        category: "카페",
         icon: Coffee,
       },
       {
         id: "place-10",
         time: "11:30",
         name: "광안리 해변",
-        description:
-          "마지막 날 부산의 바다를 즐겨보세요.",
-        type: "자연",
+        description: "광안리 해변을 산책하며 바다를 즐겨보세요.",
+        category: "자연",
         icon: Trees,
       },
       {
         id: "place-11",
         time: "13:00",
         name: "부산 대표 맛집",
-        description:
-          "여행의 마지막 식사를 즐겨보세요.",
-        type: "맛집",
+        description: "부산 여행의 마지막 식사를 즐겨보세요.",
+        category: "맛집",
         icon: Utensils,
       },
     ],
@@ -179,9 +141,131 @@ const samplePlan = [
 ]
 
 
-// --------------------------------------------------
-// 날짜별 드롭 영역
-// --------------------------------------------------
+// ------------------------------------
+// 시간 표시
+// ------------------------------------
+
+const formatTime = (time) => {
+  if (!time) return ""
+
+  const [hourString, minute] = time.split(":")
+  const hour = Number(hourString)
+
+  if (hour < 12) {
+    return `오전 ${hour === 0 ? 12 : hour}:${minute}`
+  }
+
+  return `오후 ${hour === 12 ? 12 : hour - 12}:${minute}`
+}
+
+
+// ------------------------------------
+// 시간 선택용 함수
+// ------------------------------------
+
+const getPeriod = (time) => {
+  if (!time) return ""
+
+  const hour = Number(time.split(":")[0])
+
+  return hour < 12 ? "오전" : "오후"
+}
+
+
+const getDisplayHour = (time) => {
+  if (!time) return ""
+
+  const hour = Number(time.split(":")[0])
+
+  return String(hour % 12 || 12)
+}
+
+
+// ------------------------------------
+// 장소 상세정보
+// ------------------------------------
+
+const getPlaceDetail = (place) => {
+  const details = {
+    감천문화마을: {
+      address: "부산 사하구 감천동",
+      rating: "4.5",
+      stay: "1시간 30분",
+      hours: "09:00 ~ 18:00",
+      description:
+        "알록달록한 집들이 모여 있는 부산의 대표적인 관광 명소입니다.",
+    },
+
+    "해운대 해수욕장": {
+      address: "부산 해운대구 해운대해변로",
+      rating: "4.6",
+      stay: "2시간",
+      hours: "상시 이용",
+      description:
+        "부산을 대표하는 해수욕장으로 바다와 주변 관광지를 함께 즐길 수 있습니다.",
+    },
+
+    동백섬: {
+      address: "부산 해운대구 동백로",
+      rating: "4.5",
+      stay: "1시간",
+      hours: "상시 이용",
+      description:
+        "해운대 해변과 연결된 아름다운 자연 명소입니다.",
+    },
+
+    남포동: {
+      address: "부산 중구 남포동",
+      rating: "4.4",
+      stay: "1시간 30분",
+      hours: "매장별 상이",
+      description:
+        "맛집과 쇼핑, 다양한 볼거리가 모여 있는 부산의 대표적인 번화가입니다.",
+    },
+
+    "BIFF 광장": {
+      address: "부산 중구 비프광장로",
+      rating: "4.3",
+      stay: "1시간",
+      hours: "상시 이용",
+      description:
+        "부산 국제영화제의 중심지로 다양한 먹거리와 볼거리를 즐길 수 있습니다.",
+    },
+
+    용두산공원: {
+      address: "부산 중구 용두산길",
+      rating: "4.5",
+      stay: "1시간",
+      hours: "상시 이용",
+      description:
+        "부산타워와 아름다운 전망을 볼 수 있는 부산의 대표적인 공원입니다.",
+    },
+
+    "광안리 해변": {
+      address: "부산 수영구 광안해변로",
+      rating: "4.6",
+      stay: "1시간 30분",
+      hours: "상시 이용",
+      description:
+        "광안대교의 아름다운 야경으로 유명한 부산의 대표적인 해변입니다.",
+    },
+  }
+
+  return (
+    details[place.name] || {
+      address: "부산광역시",
+      rating: "4.3",
+      stay: "1시간",
+      hours: "매장별 상이",
+      description: "여행 일정에 포함된 추천 장소입니다.",
+    }
+  )
+}
+
+
+// ------------------------------------
+// 날짜 드롭존
+// ------------------------------------
 
 function DayDropZone({ dayId, children }) {
   const { setNodeRef, isOver } = useDroppable({
@@ -191,10 +275,8 @@ function DayDropZone({ dayId, children }) {
   return (
     <div
       ref={setNodeRef}
-      className={`rounded-2xl transition ${
-        isOver
-          ? "bg-sky-50 ring-2 ring-sky-300"
-          : ""
+      className={`rounded-3xl transition ${
+        isOver ? "bg-sky-50" : ""
       }`}
     >
       {children}
@@ -203,16 +285,16 @@ function DayDropZone({ dayId, children }) {
 }
 
 
-// --------------------------------------------------
-// 일정 하나
-// --------------------------------------------------
+// ------------------------------------
+// 장소 카드
+// ------------------------------------
 
 function SortablePlace({
   place,
   isEditing,
   handleChange,
   handleDelete,
-  travelData,
+  setSelectedPlace,
 }) {
   const {
     attributes,
@@ -220,6 +302,7 @@ function SortablePlace({
     setNodeRef,
     transform,
     transition,
+    isDragging,
   } = useSortable({
     id: place.id,
   })
@@ -227,220 +310,372 @@ function SortablePlace({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    opacity: isDragging ? 0.5 : 1,
   }
 
-  const Icon = place.icon
+
+  // -------------------------------
+  // 시간 변경
+  // -------------------------------
+
+  const handleTimeChange = (type, value) => {
+    const currentTime = place.time || "09:00"
+
+    let hour = Number(currentTime.split(":")[0])
+    let minute = currentTime.split(":")[1]
+
+    if (type === "period") {
+      if (value === "오전") {
+        if (hour >= 12) {
+          hour -= 12
+        }
+      } else {
+        if (hour < 12) {
+          hour += 12
+        }
+      }
+    }
+
+
+    if (type === "hour") {
+      const displayHour = Number(value)
+
+      const isPM = hour >= 12
+
+      if (isPM) {
+        hour = displayHour === 12 ? 12 : displayHour + 12
+      } else {
+        hour = displayHour === 12 ? 0 : displayHour
+      }
+    }
+
+
+    if (type === "minute") {
+      minute = value
+    }
+
+
+    const newTime =
+      `${String(hour).padStart(2, "0")}:${minute}`
+
+    handleChange(place.id, "time", newTime)
+  }
+
 
   return (
     <div
       ref={setNodeRef}
       style={style}
       {...attributes}
-      className="rounded-2xl border border-gray-100 bg-white p-5 transition hover:border-sky-200 hover:bg-sky-50/50"
+      className={`rounded-2xl border bg-white p-4 shadow-sm ${
+        !isEditing
+          ? "cursor-pointer hover:shadow-md"
+          : ""
+      }`}
+      onClick={() =>
+        !isEditing && setSelectedPlace(place)
+      }
     >
-      <div className="flex gap-4">
+      <div className="flex items-start gap-4">
 
-        {/* 드래그 버튼 */}
-        {isEditing && (
-          <button
-            type="button"
-            {...listeners}
-            className="cursor-grab pt-2 text-xl text-gray-400 hover:text-sky-500 active:cursor-grabbing"
-            title="드래그해서 순서 변경"
-          >
-            ☰
-          </button>
-        )}
+        {/* 드래그 영역 */}
+        <div
+          {...listeners}
+          className="cursor-grab pt-1 text-gray-300 active:cursor-grabbing"
+          onClick={(e) => e.stopPropagation()}
+        >
+          ⋮⋮
+        </div>
+
 
         {/* 시간 */}
-        <div className="w-24 shrink-0 pt-1">
-          <div className="flex items-center gap-1 text-sm font-bold text-gray-900">
-            <Clock3
-              size={15}
-              className="text-sky-500"
-            />
+        <div
+          className="w-auto shrink-0"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {isEditing ? (
+            <div className="flex items-center gap-1">
 
-            {isEditing ? (
+              {/* 오전 / 오후 */}
               <select
-  value={place.time}
-  onChange={(e) =>
-    handleChange(
-      place.id,
-      "time",
-      e.target.value
-    )
-  }
-  className="rounded-lg border border-gray-200 bg-white px-2 py-1 text-sm outline-none focus:border-sky-500"
->
-  {Array.from({ length: 48 }, (_, index) => {
-    const hour = Math.floor(index / 2)
-    const minute = index % 2 === 0 ? "00" : "30"
-
-    const time = `${String(hour).padStart(2, "0")}:${minute}`
-
-    return (
-      <option key={time} value={time}>
-        {time}
-      </option>
-    )
-  })}
-</select>
-            ) : (
-              place.time
-            )}
-          </div>
-        </div>
-
-        {/* 아이콘 */}
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-sky-600">
-          <Icon size={22} />
-        </div>
-
-        {/* 내용 */}
-        <div className="min-w-0 flex-1">
-
-          <div className="flex flex-wrap items-center gap-2">
-
-            {isEditing ? (
-              <input
-                type="text"
-                value={place.name}
+                value={getPeriod(place.time)}
                 onChange={(e) =>
-                  handleChange(
-                    place.id,
-                    "name",
+                  handleTimeChange(
+                    "period",
                     e.target.value
                   )
                 }
-                className="w-full max-w-md rounded-lg border border-gray-200 px-3 py-2 text-lg font-bold text-gray-900 outline-none focus:border-sky-500"
-              />
-            ) : (
-              <h3 className="text-lg font-bold text-gray-900">
-                {place.name}
-              </h3>
-            )}
+                className="rounded-lg border px-2 py-2 text-sm"
+              >
+                <option value="오전">오전</option>
+                <option value="오후">오후</option>
+              </select>
 
-            <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
-              {place.type}
-            </span>
-          </div>
 
-          {/* 설명 */}
-          {isEditing ? (
-            <textarea
-              value={place.description}
-              onChange={(e) =>
-                handleChange(
-                  place.id,
-                  "description",
-                  e.target.value
-                )
-              }
-              rows={2}
-              className="mt-3 w-full resize-none rounded-lg border border-gray-200 p-3 text-sm text-gray-700 outline-none focus:border-sky-500"
-            />
+              {/* 시 */}
+              <select
+                value={getDisplayHour(place.time)}
+                onChange={(e) =>
+                  handleTimeChange(
+                    "hour",
+                    e.target.value
+                  )
+                }
+                className="rounded-lg border px-2 py-2 text-sm"
+              >
+                {Array.from(
+                  { length: 12 },
+                  (_, index) => {
+                    const hour = index + 1
+
+                    return (
+                      <option
+                        key={hour}
+                        value={hour}
+                      >
+                        {hour}
+                      </option>
+                    )
+                  }
+                )}
+              </select>
+
+
+              {/* 분 */}
+              <select
+                value={
+                  place.time
+                    ? place.time.split(":")[1]
+                    : "00"
+                }
+                onChange={(e) =>
+                  handleTimeChange(
+                    "minute",
+                    e.target.value
+                  )
+                }
+                className="rounded-lg border px-2 py-2 text-sm"
+              >
+                {["00", "10", "20", "30", "40", "50"].map(
+                  (minute) => (
+                    <option
+                      key={minute}
+                      value={minute}
+                    >
+                      {minute}
+                    </option>
+                  )
+                )}
+              </select>
+
+            </div>
           ) : (
-            <p className="mt-2 text-sm leading-6 text-gray-500">
-              {place.description}
-            </p>
-          )}
-
-          {/* 위치 */}
-          <div className="mt-3 flex items-center gap-1 text-xs text-gray-400">
-            <MapPin size={14} />
-            {travelData?.destination || "여행지"}
-          </div>
-
-          {/* 삭제 */}
-          {isEditing && (
-            <button
-              type="button"
-              onClick={() =>
-                handleDelete(place.id)
-              }
-              className="mt-4 flex items-center gap-1 rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-500 transition hover:bg-red-100"
-            >
-              <Trash2 size={14} />
-              일정 삭제
-            </button>
+            <div className="flex items-center gap-1 text-sm font-semibold text-gray-700">
+              <Clock3 size={16} />
+              {formatTime(place.time)}
+            </div>
           )}
         </div>
+
+
+        {/* 장소 내용 */}
+        <div className="min-w-0 flex-1">
+<div
+  className="min-w-0 flex-1"
+  onClick={(e) => e.stopPropagation()}
+>
+  {place.isNew ? (
+    <div className="space-y-2">
+      <input
+        autoFocus
+        value={place.name}
+        onChange={(e) =>
+          handleChange(
+            place.id,
+            "name",
+            e.target.value
+          )
+        }
+        placeholder="장소 이름을 입력하세요"
+        className="w-full rounded-lg border px-3 py-2 font-semibold outline-none focus:border-sky-400"
+      />
+
+      <textarea
+        value={place.description}
+        onChange={(e) =>
+          handleChange(
+            place.id,
+            "description",
+            e.target.value
+          )
+        }
+        placeholder="장소에 대한 간단한 설명을 입력하세요"
+        rows={2}
+        className="w-full resize-none rounded-lg border px-3 py-2 text-sm outline-none focus:border-sky-400"
+      />
+    </div>
+  ) : (
+    <>
+      <div className="flex items-center gap-2">
+        {place.icon && (
+          <place.icon
+            size={18}
+            className="text-sky-500"
+          />
+        )}
+
+        <h3 className="font-bold text-gray-900">
+          {place.name}
+        </h3>
+      </div>
+
+      <p className="mt-1 text-sm text-gray-500">
+        {place.description}
+      </p>
+
+      <div className="mt-2 text-xs font-medium text-sky-500">
+        {place.category}
+      </div>
+    </>
+  )}
+</div>
+         {(   <>
+              <div className="flex items-center gap-2">
+                {place.icon && (
+                  <place.icon
+                    size={18}
+                    className="text-sky-500"
+                  />
+                )}
+
+                <h3 className="font-bold text-gray-900">
+                  {place.name}
+                </h3>
+              </div>
+
+              <p className="mt-1 text-sm text-gray-500">
+                {place.description}
+              </p>
+
+              <div className="mt-2 text-xs font-medium text-sky-500">
+                {place.category}
+              </div>
+            </>
+          )}
+
+        </div>
+
+
+        {/* 삭제 버튼 */}
+        {isEditing && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              handleDelete(place.id)
+            }}
+            className="rounded-lg p-2 text-red-400 hover:bg-red-50 hover:text-red-500"
+          >
+            <Trash2 size={18} />
+          </button>
+        )}
+
       </div>
     </div>
   )
 }
 
 
-// --------------------------------------------------
+// ------------------------------------
 // Result
-// --------------------------------------------------
+// ------------------------------------
 
 export default function Result({
   travelData,
   onBack,
   onConfirm,
 }) {
-  const [isEditing, setIsEditing] = useState(false)
-
   const [plan, setPlan] = useState(samplePlan)
 
+  const [isEditing, setIsEditing] =
+    useState(false)
 
-  // ------------------------------------------------
-  // 일정 수정
-  // ------------------------------------------------
+  const [selectedPlace, setSelectedPlace] =
+    useState(null)
+
+
+  // ----------------------------------
+  // 장소 시간 업데이트
+  // ----------------------------------
+
+  const updateTimes = (places) => {
+    const defaultTimes = [
+      "09:00",
+      "11:00",
+      "13:00",
+      "15:30",
+      "17:30",
+      "19:00",
+    ]
+
+    return places.map((place, index) => ({
+      ...place,
+      time:
+        defaultTimes[index] ||
+        place.time ||
+        "19:00",
+    }))
+  }
+
+
+  // ----------------------------------
+  // 장소 수정
+  // ----------------------------------
 
   const handleChange = (
     placeId,
     field,
     value
   ) => {
-    setPlan((currentPlan) => {
-      const updatedPlan = currentPlan.map(
-        (day) => {
-          const hasPlace = day.places.some(
-            (place) => place.id === placeId
-          )
+    setPlan((currentPlan) =>
+      currentPlan.map((day) => {
+        const hasPlace = day.places.some(
+          (place) => place.id === placeId
+        )
 
-          if (!hasPlace) {
-            return day
-          }
-
-          const updatedPlaces =
-            day.places.map((place) => {
-              if (place.id !== placeId) {
-                return place
-              }
-
-              return {
-                ...place,
-                [field]: value,
-              }
-            })
-
-          // 시간을 직접 수정한 경우
-          // 사용자가 입력한 시간은 유지하고
-          // 해당 날짜 안에서 시간순으로 정렬
-          if (field === "time") {
-            updatedPlaces.sort((a, b) =>
-              a.time.localeCompare(b.time)
-            )
-          }
-
-          return {
-            ...day,
-            places: updatedPlaces,
-          }
+        if (!hasPlace) {
+          return day
         }
-      )
 
-      return updatedPlan
-    })
+        let newPlaces = day.places.map(
+          (place) =>
+            place.id === placeId
+              ? {
+                  ...place,
+                  [field]: value,
+                }
+              : place
+        )
+
+        if (field === "time") {
+          newPlaces = [...newPlaces].sort(
+            (a, b) =>
+              a.time.localeCompare(b.time)
+          )
+        }
+
+        return {
+          ...day,
+          places: newPlaces,
+        }
+      })
+    )
   }
 
 
-  // ------------------------------------------------
-  // 일정 삭제
-  // ------------------------------------------------
+  // ----------------------------------
+  // 장소 삭제
+  // ----------------------------------
 
   const handleDelete = (placeId) => {
     setPlan((currentPlan) =>
@@ -454,233 +689,100 @@ export default function Result({
   }
 
 
-  // ------------------------------------------------
-  // 일정 추가
-  // ------------------------------------------------
+  // ----------------------------------
+  // 장소 추가
+  // ----------------------------------
 
   const handleAdd = (dayIndex) => {
-    setPlan((currentPlan) =>
-      currentPlan.map((day, index) => {
-        if (index !== dayIndex) {
-          return day
-        }
-
-        const newPlace = {
-          id: `place-${Date.now()}`,
-          time: "18:00",
-          name: "새로운 일정",
-          description:
-            "새로운 일정을 입력해주세요.",
-          type: "관광",
-          icon: Landmark,
-        }
-
-        const newPlaces = [
-          ...day.places,
-          newPlace,
-        ]
-
-        return {
-          ...day,
-          places: updateTimes(newPlaces),
-        }
-      })
-    )
+  const newPlace = {
+    id: `place-${Date.now()}`,
+    time: "18:00",
+    name: "",
+    description: "",
+    category: "관광",
+    icon: Landmark,
+    isNew: true,
   }
 
+  setPlan((currentPlan) =>
+    currentPlan.map((day, index) => {
+      if (index !== dayIndex) {
+        return day
+      }
 
-  // ------------------------------------------------
+      return {
+        ...day,
+        places: [...day.places, newPlace],
+      }
+    })
+  )
+}
+
+  // ----------------------------------
   // 드래그 종료
-  // ------------------------------------------------
+  // ----------------------------------
 
-  const handleDragEnd = ({
-    active,
-    over,
-  }) => {
-    if (!over) {
+  const handleDragEnd = (event) => {
+    const {
+      active,
+      over,
+    } = event
+
+    if (!over) return
+
+    const activeId = active.id
+    const overId = over.id
+
+
+    // 같은 장소를 자기 자신에게 드롭
+    if (activeId === overId) {
       return
     }
 
-    const activeId = active.id.toString()
-    const overId = over.id.toString()
 
     setPlan((currentPlan) => {
+      let sourceDayIndex = -1
+      let sourcePlaceIndex = -1
+      let targetDayIndex = -1
+      let targetPlaceIndex = -1
 
-      // --------------------------------------------
-      // 현재 일정이 들어있는 날짜 찾기
-      // --------------------------------------------
 
-      const activeDayIndex =
-        currentPlan.findIndex((day) =>
-          day.places.some(
-            (place) => place.id === activeId
+      currentPlan.forEach(
+        (day, dayIndex) => {
+          day.places.forEach(
+            (place, placeIndex) => {
+              if (place.id === activeId) {
+                sourceDayIndex = dayIndex
+                sourcePlaceIndex = placeIndex
+              }
+
+              if (place.id === overId) {
+                targetDayIndex = dayIndex
+                targetPlaceIndex = placeIndex
+              }
+            }
           )
-        )
-
-      if (activeDayIndex === -1) {
-        return currentPlan
-      }
-
-
-      // --------------------------------------------
-      // 같은 날짜 안에서 이동
-      // --------------------------------------------
-
-      const activeDay =
-        currentPlan[activeDayIndex]
-
-      const activePlaceIndex =
-        activeDay.places.findIndex(
-          (place) => place.id === activeId
-        )
-
-
-      // over가 일정인 경우
-      const overPlace = currentPlan
-        .flatMap((day) => day.places)
-        .find((place) => place.id === overId)
-
-
-      if (overPlace) {
-
-        const overDayIndex =
-          currentPlan.findIndex((day) =>
-            day.places.some(
-              (place) => place.id === overPlace.id
-            )
-          )
-
-        const overPlaceIndex =
-          currentPlan[
-            overDayIndex
-          ].places.findIndex(
-            (place) => place.id === overPlace.id
-          )
-
-
-        // 같은 날짜
-        if (
-          activeDayIndex ===
-          overDayIndex
-        ) {
-
-          if (
-            activePlaceIndex ===
-            overPlaceIndex
-          ) {
-            return currentPlan
-          }
-
-          const newPlan =
-            currentPlan.map((day) => ({
-              ...day,
-              places: [...day.places],
-            }))
-
-          const places =
-            newPlan[
-              activeDayIndex
-            ].places
-
-          const [
-            movedPlace,
-          ] = places.splice(
-            activePlaceIndex,
-            1
-          )
-
-          places.splice(
-            overPlaceIndex,
-            0,
-            movedPlace
-          )
-
-          // 드래그 순서에 맞게 시간 재배정
-          newPlan[
-            activeDayIndex
-          ].places = updateTimes(places)
-
-          return newPlan
         }
+      )
 
 
-        // ------------------------------------------
-        // 다른 날짜로 이동
-        // ------------------------------------------
-
-        const newPlan =
-          currentPlan.map((day) => ({
-            ...day,
-            places: [...day.places],
-          }))
-
-        const [
-          movedPlace,
-        ] =
-          newPlan[
-            activeDayIndex
-          ].places.splice(
-            activePlaceIndex,
-            1
-          )
-
-        if (!movedPlace) {
-          return currentPlan
-        }
-
-        newPlan[
-          overDayIndex
-        ].places.splice(
-          overPlaceIndex,
-          0,
-          movedPlace
-        )
-
-        // 두 날짜 모두 시간 재배정
-        newPlan[
-          activeDayIndex
-        ].places = updateTimes(
-          newPlan[
-            activeDayIndex
-          ].places
-        )
-
-        newPlan[
-          overDayIndex
-        ].places = updateTimes(
-          newPlan[
-            overDayIndex
-          ].places
-        )
-
-        return newPlan
-      }
-
-
-      // --------------------------------------------
-      // 일정이 아니라 날짜 영역에 놓은 경우
-      // → 해당 날짜 맨 뒤로 이동
-      // --------------------------------------------
-
-      if (overId.startsWith("day-")) {
-
-        const targetDayId =
+      // 날짜 영역으로 이동
+      if (
+        overId.startsWith("day-")
+      ) {
+        const targetDayId = Number(
           overId.replace("day-", "")
+        )
 
-        const targetDayIndex =
+        targetDayIndex =
           currentPlan.findIndex(
             (day) =>
               day.id === targetDayId
           )
 
-        if (targetDayIndex === -1) {
-          return currentPlan
-        }
-
-        // 같은 날짜면 아무것도 하지 않음
         if (
-          activeDayIndex ===
-          targetDayIndex
+          sourceDayIndex === -1 ||
+          targetDayIndex === -1
         ) {
           return currentPlan
         }
@@ -693,392 +795,282 @@ export default function Result({
 
         const [
           movedPlace,
-        ] =
-          newPlan[
-            activeDayIndex
-          ].places.splice(
-            activePlaceIndex,
-            1
-          )
-
-        if (!movedPlace) {
-          return currentPlan
-        }
+        ] = newPlan[
+          sourceDayIndex
+        ].places.splice(
+          sourcePlaceIndex,
+          1
+        )
 
         newPlan[
           targetDayIndex
         ].places.push(movedPlace)
 
-        // 시간 재배정
-        newPlan[
-          activeDayIndex
-        ].places = updateTimes(
-          newPlan[
-            activeDayIndex
-          ].places
-        )
-
-        newPlan[
-          targetDayIndex
-        ].places = updateTimes(
-          newPlan[
-            targetDayIndex
-          ].places
-        )
+        newPlan[targetDayIndex].places =
+          updateTimes(
+            newPlan[targetDayIndex]
+              .places
+          )
 
         return newPlan
       }
 
-      return currentPlan
+
+      // 장소 사이로 이동
+      if (
+        sourceDayIndex === -1 ||
+        targetDayIndex === -1
+      ) {
+        return currentPlan
+      }
+
+
+      const newPlan =
+        currentPlan.map((day) => ({
+          ...day,
+          places: [...day.places],
+        }))
+
+
+      const [
+        movedPlace,
+      ] = newPlan[
+        sourceDayIndex
+      ].places.splice(
+        sourcePlaceIndex,
+        1
+      )
+
+
+      let insertIndex =
+        targetPlaceIndex
+
+      if (
+        sourceDayIndex === targetDayIndex &&
+        sourcePlaceIndex <
+          targetPlaceIndex
+      ) {
+        insertIndex -= 1
+      }
+
+
+      newPlan[
+        targetDayIndex
+      ].places.splice(
+        insertIndex,
+        0,
+        movedPlace
+      )
+
+
+      newPlan[
+        targetDayIndex
+      ].places = updateTimes(
+        newPlan[targetDayIndex]
+          .places
+      )
+
+
+      if (
+        sourceDayIndex !== targetDayIndex
+      ) {
+        newPlan[
+          sourceDayIndex
+        ].places = updateTimes(
+          newPlan[sourceDayIndex]
+            .places
+        )
+      }
+
+
+      return newPlan
     })
   }
 
 
-  // ------------------------------------------------
-  // 날짜 표시
-  // ------------------------------------------------
+  // ----------------------------------
+  // 여행 날짜 표시
+  // ----------------------------------
 
-  const formatDate = (date) => {
-  if (!date) {
-    return ""
+  const getTravelDate = (day) => {
+    if (!travelData) {
+      return day.date
+    }
+
+    const startDate =
+      travelData.startDate
+
+    if (!startDate) {
+      return day.date
+    }
+
+    const date = new Date(startDate)
+
+    date.setDate(
+      date.getDate() +
+        (day.id - 1)
+    )
+
+    return `${date.getMonth() + 1}월 ${date.getDate()}일`
   }
-
-  const parsedDate = new Date(date)
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return date
-  }
-
-  return `${parsedDate.getMonth() + 1}월 ${parsedDate.getDate()}일`
-}
-
-const getNightCount = (startDate, endDate) => {
-  if (!startDate || !endDate) {
-    return 0
-  }
-
-  const start = new Date(startDate)
-  const end = new Date(endDate)
-
-  if (
-    Number.isNaN(start.getTime()) ||
-    Number.isNaN(end.getTime())
-  ) {
-    return 0
-  }
-
-  const difference =
-    end.getTime() - start.getTime()
-
-  return Math.round(
-    difference / (1000 * 60 * 60 * 24)
-  )
-}
-
-const formatDateRange = () => {
-  if (
-    !travelData?.startDate ||
-    !travelData?.endDate
-  ) {
-    return "여행 날짜"
-  }
-
-  const start = formatDate(
-    travelData.startDate
-  )
-
-  const end = formatDate(
-    travelData.endDate
-  )
-
-  const nights = getNightCount(
-    travelData.startDate,
-    travelData.endDate
-  )
-
-  const days = nights + 1
-
-  return `${start} ~ ${end} (${nights}박 ${days}일)`
-}
 
 
   return (
-    <main className="min-h-[calc(100vh-4rem)] bg-sky-50 px-6 py-12">
+    <main className="min-h-screen bg-sky-50 px-6 py-10">
+
+      {/* -------------------------------- */}
+      {/* 상단 */}
+      {/* -------------------------------- */}
 
       <div className="mx-auto max-w-5xl">
 
-        {/* ---------------------------------------- */}
-        {/* 상단 제목 */}
-        {/* ---------------------------------------- */}
+        <div className="mb-8">
+          <div className="mb-2 flex items-center gap-2 text-sky-500">
+            <MapPin size={20} />
 
-        <div className="mb-10 text-center">
+            <span className="font-semibold">
+              여행 계획
+            </span>
+          </div>
 
-          <p className="mb-2 text-sm font-semibold text-sky-500">
-            AI TRAVEL PLANNER
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {travelData?.destination ||
+              "부산"}{" "}
+            여행 일정
+          </h1>
 
-          <h2 className="text-4xl font-bold text-gray-900">
-            나의 여행 계획
-          </h2>
-
-          <p className="mt-3 text-gray-500">
-            입력하신 조건을 바탕으로 여행 일정을 만들었어요.
+          <p className="mt-2 text-gray-500">
+            AI가 추천한 여행 일정을 확인하고
+            원하는 대로 수정해보세요.
           </p>
         </div>
 
 
-        {/* ---------------------------------------- */}
-        {/* 여행 조건 */}
-        {/* ---------------------------------------- */}
-
-        <div className="mb-8 rounded-3xl bg-white p-7 shadow-lg">
-
-          <h3 className="mb-5 text-xl font-bold text-gray-900">
-            여행 조건
-          </h3>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-
-            <div className="rounded-2xl bg-sky-50 p-4">
-              <p className="text-xs font-semibold text-gray-400">
-                여행지
-              </p>
-
-              <p className="mt-1 font-bold text-gray-900">
-                {travelData?.destination || "여행지"}
-              </p>
-            </div>
-
-
-            <div className="rounded-2xl bg-sky-50 p-4">
-              <p className="text-xs font-semibold text-gray-400">
-                여행 날짜
-              </p>
-
-              <p className="mt-1 font-bold text-gray-900">
-                {formatDateRange()}
-              </p>
-            </div>
-
-
-            <div className="rounded-2xl bg-sky-50 p-4">
-              <p className="text-xs font-semibold text-gray-400">
-                인원
-              </p>
-
-              <p className="mt-1 font-bold text-gray-900">
-                {travelData?.people || "-"}
-              </p>
-            </div>
-
-
-            <div className="rounded-2xl bg-sky-50 p-4">
-              <p className="text-xs font-semibold text-gray-400">
-                교통수단
-              </p>
-
-              <p className="mt-1 font-bold text-gray-900">
-                {travelData?.transport || "-"}
-              </p>
-            </div>
-
-
-            <div className="rounded-2xl bg-sky-50 p-4">
-              <p className="text-xs font-semibold text-gray-400">
-                예산
-              </p>
-
-              <p className="mt-1 font-bold text-gray-900">
-                {travelData?.budget || "-"}
-              </p>
-            </div>
-
-
-            <div className="rounded-2xl bg-sky-50 p-4">
-              <p className="text-xs font-semibold text-gray-400">
-                선호 스타일
-              </p>
-
-              <p className="mt-1 font-bold text-gray-900">
-                {travelData?.styles?.join(", ") || "-"}
-              </p>
-            </div>
-
-          </div>
-
-
-          {travelData?.disliked && (
-            <div className="mt-4 rounded-2xl bg-gray-50 p-4">
-
-              <p className="text-xs font-semibold text-gray-400">
-                제외하고 싶은 것
-              </p>
-
-              <p className="mt-1 text-sm text-gray-700">
-                {travelData.disliked}
-              </p>
-
-            </div>
-          )}
-
-        </div>
-
-
-        {/* ---------------------------------------- */}
-        {/* 수정 안내 */}
-        {/* ---------------------------------------- */}
-
-        {isEditing && (
-          <div className="mb-6 rounded-2xl border border-sky-200 bg-sky-50 px-5 py-4 text-sm text-sky-700">
-
-            <p className="font-semibold">
-              ✏️ 일정 수정 모드
-            </p>
-
-            <p className="mt-1">
-              시간, 장소 이름, 설명을 직접 수정할 수 있어요.
-              일정 왼쪽의 ☰ 버튼을 드래그하면 순서를 변경할 수 있습니다.
-            </p>
-
-            <p className="mt-1">
-              다른 날짜로 드래그하면 해당 날짜로 일정이 이동합니다.
-            </p>
-
-          </div>
-        )}
-
-
-        {/* ---------------------------------------- */}
+        {/* -------------------------------- */}
         {/* 여행 일정 */}
-        {/* ---------------------------------------- */}
+        {/* -------------------------------- */}
 
         <DndContext
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
         >
 
-          <div className="space-y-8">
+          <div className="space-y-6">
 
-            {plan.map((day, dayIndex) => (
+            {plan.map(
+              (day, dayIndex) => (
+                <DayDropZone
+                  key={day.id}
+                  dayId={day.id}
+                >
 
-              <DayDropZone
-                key={day.id}
-                dayId={day.id}
-              >
+                  <div className="rounded-3xl bg-white p-6 shadow-sm">
 
-                <section className="rounded-3xl bg-white p-7 shadow-lg">
+                    {/* 날짜 */}
+                    <div className="mb-5 flex items-center justify-between">
 
-                  {/* 날짜 제목 */}
+                      <div>
+                        <div className="text-sm font-medium text-sky-500">
+                          DAY {day.id}
+                        </div>
 
-                  <div className="mb-6 flex items-center justify-between">
+                        <h2 className="mt-1 text-xl font-bold text-gray-900">
+                          {getTravelDate(day)}
+                        </h2>
+                      </div>
 
-                    <div>
-                      <p className="text-sm font-bold text-sky-500">
-                        {day.day}
-                      </p>
-
-                      <h3 className="mt-1 text-2xl font-bold text-gray-900">
-                        {day.date}
-                      </h3>
                     </div>
 
-                    <div className="rounded-xl bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-600">
-                      {day.places.length}개 일정
-                    </div>
+
+                    {/* 장소 목록 */}
+                    <SortableContext
+                      items={day.places.map(
+                        (place) =>
+                          place.id
+                      )}
+                      strategy={
+                        verticalListSortingStrategy
+                      }
+                    >
+
+                      <div className="space-y-3">
+
+                        {day.places.map(
+                          (place) => (
+                            <SortablePlace
+                              key={place.id}
+                              place={place}
+                              isEditing={
+                                isEditing
+                              }
+                              handleChange={
+                                handleChange
+                              }
+                              handleDelete={
+                                handleDelete
+                              }
+                              setSelectedPlace={
+                                setSelectedPlace
+                              }
+                            />
+                          )
+                        )}
+
+                      </div>
+
+                    </SortableContext>
+
+
+                    {/* 장소 추가 */}
+                    {isEditing && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleAdd(
+                            dayIndex
+                          )
+                        }
+                        className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 py-4 text-sm font-semibold text-gray-400 hover:border-sky-300 hover:bg-sky-50 hover:text-sky-500"
+                      >
+                        <Plus size={18} />
+                        장소 추가
+                      </button>
+                    )}
 
                   </div>
 
-
-                  {/* 일정 */}
-
-                  <SortableContext
-                    items={day.places.map(
-                      (place) => place.id
-                    )}
-                    strategy={
-                      verticalListSortingStrategy
-                    }
-                  >
-
-                    <div className="space-y-4">
-
-                      {day.places.map(
-                        (place) => (
-
-                          <SortablePlace
-                            key={place.id}
-                            place={place}
-                            isEditing={isEditing}
-                            handleChange={
-                              handleChange
-                            }
-                            handleDelete={
-                              handleDelete
-                            }
-                            travelData={
-                              travelData
-                            }
-                          />
-
-                        )
-                      )}
-
-                    </div>
-
-                  </SortableContext>
-
-
-                  {/* 일정 추가 */}
-
-                  {isEditing && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleAdd(dayIndex)
-                      }
-                      className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-sky-300 py-3 text-sm font-semibold text-sky-500 transition hover:bg-sky-50"
-                    >
-                      <Plus size={18} />
-                      일정 추가
-                    </button>
-                  )}
-
-                </section>
-
-              </DayDropZone>
-
-            ))}
+                </DayDropZone>
+              )
+            )}
 
           </div>
 
         </DndContext>
 
 
-        {/* ---------------------------------------- */}
+        {/* -------------------------------- */}
         {/* 하단 버튼 */}
-        {/* ---------------------------------------- */}
+        {/* -------------------------------- */}
 
-        <div className="mt-10 flex flex-wrap justify-center gap-4">
-
-          {/* 다시 만들기 */}
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
 
           <button
             type="button"
             onClick={onBack}
-            className="rounded-2xl bg-gray-900 px-8 py-4 text-sm font-bold text-white transition hover:bg-gray-800"
+            className="flex-1 rounded-2xl border border-gray-200 bg-white px-5 py-4 font-semibold text-gray-700 hover:bg-gray-50"
           >
             여행 계획 다시 만들기
           </button>
 
 
-          {/* 수정 */}
-
           <button
             type="button"
             onClick={() =>
-              setIsEditing(!isEditing)
+              setIsEditing(
+                (current) => !current
+              )
             }
-            className="rounded-2xl bg-white px-8 py-4 text-sm font-bold text-gray-900 ring-1 ring-gray-300 transition hover:bg-gray-100"
+            className="flex-1 rounded-2xl border border-sky-200 bg-white px-5 py-4 font-semibold text-sky-600 hover:bg-sky-50"
           >
             {isEditing
               ? "수정 완료"
@@ -1086,19 +1078,177 @@ const formatDateRange = () => {
           </button>
 
 
-          {/* 확정 */}
-
           <button
-  type="button"
-  onClick={onConfirm}
-  className="rounded-2xl bg-sky-500 px-8 py-4 text-sm font-bold text-white transition hover:bg-sky-600"
->
-  여행 계획 확정하기
-</button>
+            type="button"
+            onClick={onConfirm}
+            className="flex-1 rounded-2xl bg-sky-500 px-5 py-4 font-semibold text-white hover:bg-sky-600"
+          >
+            확정하기
+          </button>
 
         </div>
 
       </div>
+
+
+      {/* ================================== */}
+      {/* 장소 상세정보 모달 */}
+      {/* ================================== */}
+
+      {selectedPlace && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+          onClick={() =>
+            setSelectedPlace(null)
+          }
+        >
+
+          <div
+            className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"
+            onClick={(e) =>
+              e.stopPropagation()
+            }
+          >
+
+            {/* 모달 상단 */}
+            <div className="mb-5 flex items-start justify-between">
+
+              <div>
+                <div className="mb-1 text-sm font-medium text-sky-500">
+                  여행 추천 장소
+                </div>
+
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {selectedPlace.name}
+                </h2>
+              </div>
+
+
+              <button
+                type="button"
+                onClick={() =>
+                  setSelectedPlace(null)
+                }
+                className="rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+              >
+                <X size={22} />
+              </button>
+
+            </div>
+
+
+            {/* 주소 / 별점 */}
+            <div className="mb-5 rounded-2xl bg-sky-50 p-4">
+
+              <div className="mb-2 flex items-center gap-2 text-sm text-gray-600">
+                <MapPin
+                  size={17}
+                  className="text-sky-500"
+                />
+
+                {
+                  getPlaceDetail(
+                    selectedPlace
+                  ).address
+                }
+              </div>
+
+
+              <div className="text-sm text-gray-600">
+                ⭐{" "}
+                {
+                  getPlaceDetail(
+                    selectedPlace
+                  ).rating
+                }
+              </div>
+
+            </div>
+
+
+            {/* 설명 */}
+            <p className="mb-6 leading-7 text-gray-600">
+              {
+                getPlaceDetail(
+                  selectedPlace
+                ).description
+              }
+            </p>
+
+
+            {/* 체류시간 / 운영시간 */}
+            <div className="mb-6 grid grid-cols-2 gap-3">
+
+              <div className="rounded-2xl bg-gray-50 p-4">
+
+                <div className="mb-1 text-xs text-gray-400">
+                  추천 체류시간
+                </div>
+
+                <div className="font-semibold text-gray-800">
+                  {
+                    getPlaceDetail(
+                      selectedPlace
+                    ).stay
+                  }
+                </div>
+
+              </div>
+
+
+              <div className="rounded-2xl bg-gray-50 p-4">
+
+                <div className="mb-1 text-xs text-gray-400">
+                  운영시간
+                </div>
+
+                <div className="font-semibold text-gray-800">
+                  {
+                    getPlaceDetail(
+                      selectedPlace
+                    ).hours
+                  }
+                </div>
+
+              </div>
+
+            </div>
+
+
+            {/* 버튼 */}
+            <div className="flex gap-3">
+
+              <button
+                type="button"
+                onClick={() => {
+                  handleDelete(
+                    selectedPlace.id
+                  )
+
+                  setSelectedPlace(null)
+                }}
+                className="flex-1 rounded-xl border border-red-200 px-4 py-3 font-semibold text-red-500 hover:bg-red-50"
+              >
+                일정에서 삭제
+              </button>
+
+
+              <button
+                type="button"
+                onClick={() =>
+                  setSelectedPlace(null)
+                }
+                className="flex-1 rounded-xl bg-sky-500 px-4 py-3 font-semibold text-white hover:bg-sky-600"
+              >
+                닫기
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
 
     </main>
   )
