@@ -24,6 +24,7 @@ import {
   Trash2,
   Plus,
   X,
+  Search,
 } from "lucide-react"
 
 
@@ -603,6 +604,17 @@ export default function Result({
   const [selectedPlace, setSelectedPlace] =
     useState(null)
 
+  const [isPlaceSearchOpen, setIsPlaceSearchOpen] =
+    useState(false)
+  const [selectedDayIndex, setSelectedDayIndex] =
+    useState(null)
+  const [placeSearchText, setPlaceSearchText] =
+    useState("")
+  const [newPlaceDescription, setNewPlaceDescription] =
+    useState("")
+  const [newPlaceCategory, setNewPlaceCategory] =
+    useState("관광")
+
 
   // ----------------------------------
   // 장소 시간 업데이트
@@ -694,29 +706,54 @@ export default function Result({
   // ----------------------------------
 
   const handleAdd = (dayIndex) => {
-  const newPlace = {
-    id: `place-${Date.now()}`,
-    time: "18:00",
-    name: "",
-    description: "",
-    category: "관광",
-    icon: Landmark,
-    isNew: true,
+    setSelectedDayIndex(dayIndex)
+    setPlaceSearchText("")
+    setNewPlaceDescription("")
+    setNewPlaceCategory("관광")
+    setIsPlaceSearchOpen(true)
   }
 
-  setPlan((currentPlan) =>
-    currentPlan.map((day, index) => {
-      if (index !== dayIndex) {
-        return day
-      }
+  // 장소 검색 API 연동 전에는 입력한 이름으로 일정을 추가합니다.
+  // 나중에 네이버 검색 결과를 선택하는 방식으로 연결할 수 있습니다.
+  const handleConfirmAddPlace = () => {
+    const placeName = placeSearchText.trim()
 
-      return {
-        ...day,
-        places: [...day.places, newPlace],
-      }
-    })
-  )
-}
+    if (!placeName || selectedDayIndex === null) return
+
+    const categoryIcons = {
+      관광: Landmark,
+      맛집: Utensils,
+      카페: Coffee,
+      자연: Trees,
+      기타: MapPin,
+    }
+
+    const newPlace = {
+      id: `place-${Date.now()}`,
+      time: "18:00",
+      name: placeName,
+      description: newPlaceDescription.trim(),
+      category: newPlaceCategory,
+      icon: categoryIcons[newPlaceCategory] || Landmark,
+    }
+
+    setPlan((currentPlan) =>
+      currentPlan.map((day, index) => {
+        if (index !== selectedDayIndex) return day
+
+        return {
+          ...day,
+          places: [...day.places, newPlace],
+        }
+      })
+    )
+
+    setIsPlaceSearchOpen(false)
+    setSelectedDayIndex(null)
+    setPlaceSearchText("")
+    setNewPlaceDescription("")
+  }
+
 
   // ----------------------------------
   // 드래그 종료
@@ -1090,6 +1127,122 @@ export default function Result({
 
       </div>
 
+
+      {/* ================================== */}
+      {/* 장소 검색 및 일정 추가 모달 */}
+      {/* ================================== */}
+      {isPlaceSearchOpen && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 px-4 py-6"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsPlaceSearchOpen(false)
+            }
+          }}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="place-search-title"
+            className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl"
+          >
+            <div className="mb-5 flex items-start justify-between gap-3">
+              <div>
+                <h2 id="place-search-title" className="text-xl font-bold text-gray-900">
+                  장소 검색 및 추가
+                </h2>
+                <p className="mt-1 text-sm text-gray-500">
+                  여행 일정에 추가할 장소를 입력하세요.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsPlaceSearchOpen(false)}
+                className="rounded-full p-2 text-gray-500 hover:bg-gray-100"
+                aria-label="팝업 닫기"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <label htmlFor="place-search-input" className="mb-2 block text-sm font-semibold text-gray-700">
+              장소명 또는 건물명
+            </label>
+            <div className="flex items-center gap-2 rounded-xl border border-gray-200 px-3 focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-100">
+              <Search size={18} className="shrink-0 text-gray-400" />
+              <input
+                id="place-search-input"
+                type="text"
+                autoFocus
+                value={placeSearchText}
+                onChange={(e) => setPlaceSearchText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault()
+                    handleConfirmAddPlace()
+                  }
+                }}
+                placeholder="예: 해운대 해수욕장, 부산역, 숙소명"
+                className="w-full border-0 py-3 text-sm outline-none focus:ring-0"
+              />
+            </div>
+            <p className="mt-2 text-xs leading-5 text-gray-400">
+              현재는 입력한 장소명을 일정에 추가합니다. 네이버 장소 검색 API 연동 후 이곳에 실제 검색 결과 목록을 표시할 수 있어요.
+            </p>
+
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div>
+                <label htmlFor="new-place-category" className="mb-2 block text-sm font-semibold text-gray-700">
+                  장소 유형
+                </label>
+                <select
+                  id="new-place-category"
+                  value={newPlaceCategory}
+                  onChange={(e) => setNewPlaceCategory(e.target.value)}
+                  className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm outline-none focus:border-sky-500"
+                >
+                  <option value="관광">관광</option>
+                  <option value="맛집">맛집</option>
+                  <option value="카페">카페</option>
+                  <option value="자연">자연</option>
+                  <option value="기타">기타</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="new-place-description" className="mb-2 block text-sm font-semibold text-gray-700">
+                  메모 (선택)
+                </label>
+                <input
+                  id="new-place-description"
+                  type="text"
+                  value={newPlaceDescription}
+                  onChange={(e) => setNewPlaceDescription(e.target.value)}
+                  placeholder="예: 점심 식사"
+                  className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm outline-none focus:border-sky-500"
+                />
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setIsPlaceSearchOpen(false)}
+                className="rounded-xl border border-gray-200 px-5 py-3 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmAddPlace}
+                disabled={!placeSearchText.trim()}
+                className="rounded-xl bg-sky-500 px-5 py-3 text-sm font-semibold text-white hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                일정에 추가
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
 
       {/* ================================== */}
       {/* 장소 상세정보 모달 */}

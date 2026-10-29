@@ -297,6 +297,115 @@ const regionData = {
 }
 
 
+
+const recommendedPlacesByRegion = {
+  서울특별시: [
+    "서울역",
+    "용산역",
+    "청량리역",
+    "김포국제공항",
+    "인천국제공항",
+    "서울고속버스터미널",
+    "동서울종합터미널",
+  ],
+  부산광역시: [
+    "부산역",
+    "구포역",
+    "김해국제공항",
+    "부산종합버스터미널",
+    "부산서부버스터미널",
+  ],
+  대구광역시: [
+    "동대구역",
+    "대구역",
+    "대구국제공항",
+    "서부정류장",
+  ],
+  인천광역시: [
+    "인천역",
+    "인천국제공항",
+    "인천종합터미널",
+  ],
+  광주광역시: [
+    "광주송정역",
+    "광주역",
+    "광주종합버스터미널(유스퀘어)",
+  ],
+  대전광역시: [
+    "대전역",
+    "서대전역",
+    "대전복합터미널",
+  ],
+  울산광역시: [
+    "울산역",
+    "태화강역",
+    "울산공항",
+    "울산시외버스터미널",
+  ],
+  세종특별자치시: [
+    "조치원역",
+    "세종고속시외버스터미널",
+  ],
+  경기도: [
+    "수원역",
+    "평택역",
+    "의정부역",
+    "수원종합버스터미널",
+    "김포국제공항",
+  ],
+  강원특별자치도: [
+    "강릉역",
+    "원주역",
+    "춘천역",
+    "속초시외버스터미널",
+    "양양국제공항",
+  ],
+  충청북도: [
+    "청주역",
+    "오송역",
+    "충주역",
+    "청주국제공항",
+    "청주시외버스터미널",
+  ],
+  충청남도: [
+    "천안아산역",
+    "천안역",
+    "공주역",
+    "천안종합버스터미널",
+  ],
+  전북특별자치도: [
+    "전주역",
+    "익산역",
+    "군산역",
+    "전주시외버스터미널",
+  ],
+  전라남도: [
+    "목포역",
+    "순천역",
+    "여수엑스포역",
+    "무안국제공항",
+    "광주종합버스터미널(유스퀘어)",
+  ],
+  경상북도: [
+    "포항역",
+    "경주역",
+    "김천구미역",
+    "포항경주공항",
+    "포항시외버스터미널",
+  ],
+  경상남도: [
+    "창원중앙역",
+    "진주역",
+    "김해국제공항",
+    "마산시외버스터미널",
+  ],
+  제주특별자치도: [
+    "제주국제공항",
+    "서귀포버스터미널",
+    "제주시버스터미널",
+  ],
+}
+
 export default function Home({ onCreatePlan }) {
   const [destination, setDestination] = useState("")
 
@@ -498,22 +607,22 @@ export default function Home({ onCreatePlan }) {
     }
 
     if (!arrivalPlace) {
-      alert("도착 장소를 선택해주세요.")
+      alert("여행 시작 장소를 선택해주세요.")
       return
     }
 
     if (!arrivalTime) {
-      alert("도착 시간을 입력해주세요.")
+      alert("여행 시작 시간을 입력해주세요.")
       return
     }
 
     if (!departurePlace) {
-      alert("출발 장소를 선택해주세요.")
+      alert("여행 종료 장소를 선택해주세요.")
       return
     }
 
     if (!departureTime) {
-      alert("출발 시간을 입력해주세요.")
+      alert("여행 종료 시간을 입력해주세요.")
       return
     }
 
@@ -683,11 +792,11 @@ export default function Home({ onCreatePlan }) {
               </div>
 
 
-              {/* 출발 정보 */}
+              {/* 여행 시작 정보 */}
               <div className="rounded-2xl bg-gray-50 p-5">
 
                 <p className="mb-3 text-sm font-medium text-gray-400">
-                  여행지 출발 정보
+                  여행 시작 정보
                 </p>
 
                 <p className="font-semibold text-gray-800">
@@ -856,7 +965,7 @@ export default function Home({ onCreatePlan }) {
             {/* =========================
                 여행지 등록
             ========================== */}
-            <div className="mb-6지 rounded-2xl bg-gray-50 p-6">
+            <div className="mb-6 rounded-2xl bg-gray-50 p-6">
 
               <h3 className="mb-5 text-lg font-bold text-gray-800">
                 📍 여행지 등록
@@ -873,6 +982,8 @@ export default function Home({ onCreatePlan }) {
                   onChange={(e) => {
                     setArrivalSido(e.target.value)
                     setArrivalSigungu("")
+                    setArrivalPlace("")
+                    setDeparturePlace("")
                   }}
                   className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-sky-500"
                 >
@@ -898,11 +1009,11 @@ export default function Home({ onCreatePlan }) {
                 {/* 시/군/구 */}
                 <select
                   value={arrivalSigungu}
-                  onChange={(e) =>
-                    setArrivalSigungu(
-                      e.target.value
-                    )
-                  }
+                  onChange={(e) => {
+                    setArrivalSigungu(e.target.value)
+                    setArrivalPlace("")
+                    setDeparturePlace("")
+                  }}
                   disabled={!arrivalSido}
                   className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-sky-500 disabled:bg-gray-100 disabled:text-gray-400"
                 >
@@ -1044,7 +1155,7 @@ export default function Home({ onCreatePlan }) {
                 </h3>
 
                 <p className="mb-1 text-sm text-gray-400">
-                  여행지에 도착하고 출발할
+                  여행을 시작하고 종료할
                   장소와 시간을 선택해주세요.
                 </p>
                 <p className="mb-6 text-sm text-gray-400">
@@ -1059,7 +1170,7 @@ export default function Home({ onCreatePlan }) {
                 <div className="mb-6 rounded-2xl bg-white p-5">
 
                   <h4 className="mb-5 font-bold text-gray-800">
-                    ✈️ 도착 정보
+                    ✈️ 여행 시작 정보
                   </h4>
 
 
@@ -1067,40 +1178,33 @@ export default function Home({ onCreatePlan }) {
                   <div className="mb-5">
 
                     <label className="mb-2 block text-sm font-semibold text-gray-700">
-                      도착 장소
+                      여행 시작 장소
                     </label>
 
-                    <select
+                    <input
+                      list="arrival-place-options"
                       value={arrivalPlace}
-                      onChange={(e) =>
-                        setArrivalPlace(
-                          e.target.value
-                        )
+                      onChange={(e) => setArrivalPlace(e.target.value)}
+                      placeholder={
+                        arrivalSido && arrivalSigungu
+                          ? "추천 장소를 선택하거나 직접 입력하세요"
+                          : "먼저 여행 지역을 선택해주세요"
                       }
-                      className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-sky-500"
-                    >
-
-                      <option value="">
-                        도착 장소를 선택해주세요
-                      </option>
-
-                      <option value="기차역">
-                        🚆 기차역
-                      </option>
-
-                      <option value="공항">
-                        ✈️ 공항
-                      </option>
-
-                      <option value="버스터미널">
-                        🚌 버스터미널
-                      </option>
-
-                      <option value="기타">
-                        📍 기타
-                      </option>
-
-                    </select>
+                      disabled={!arrivalSido || !arrivalSigungu}
+                      className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-sky-500 disabled:bg-gray-100 disabled:text-gray-400"
+                    />
+                    <datalist id="arrival-place-options">
+                      {(recommendedPlacesByRegion[arrivalSido] || []).map(
+                        (place) => (
+                          <option key={place} value={place} />
+                        )
+                      )}
+                    </datalist>
+                    <p className="mt-2 text-xs text-gray-400">
+                      {arrivalSido && arrivalSigungu
+                        ? `${arrivalSido} 추천 장소예요. 목록에 없으면 장소 이름을 직접 입력할 수 있어요.`
+                        : "여행 지역을 선택하면 해당 지역의 교통 거점을 추천해요."}
+                    </p>
 
                   </div>
 
@@ -1109,7 +1213,7 @@ export default function Home({ onCreatePlan }) {
                   <div>
 
                     <label className="mb-2 block text-sm font-semibold text-gray-700">
-                      도착 시간
+                      여행 시작 시간
                     </label>
 
                     <div className="flex gap-2">
@@ -1340,62 +1444,53 @@ export default function Home({ onCreatePlan }) {
 
 
                 {/* =========================
-                    출발 정보
+                    여행 종료 정보
                 ========================== */}
                 <div className="rounded-2xl bg-white p-5">
 
                   <h4 className="mb-5 font-bold text-gray-800">
-                    🚌 출발 정보
+                    🚌 여행 종료 정보
                   </h4>
 
 
-                  {/* 출발 장소 */}
+                  {/* 여행 종료 장소 */}
                   <div className="mb-5">
 
                     <label className="mb-2 block text-sm font-semibold text-gray-700">
-                      출발 장소
+                      여행 종료 장소
                     </label>
 
-                    <select
+                    <input
+                      list="departure-place-options"
                       value={departurePlace}
-                      onChange={(e) =>
-                        setDeparturePlace(
-                          e.target.value
-                        )
+                      onChange={(e) => setDeparturePlace(e.target.value)}
+                      placeholder={
+                        arrivalSido && arrivalSigungu
+                          ? "추천 장소를 선택하거나 직접 입력하세요"
+                          : "먼저 여행 지역을 선택해주세요"
                       }
-                      className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-sky-500"
-                    >
-
-                      <option value="">
-                        출발 장소를 선택해주세요
-                      </option>
-
-                      <option value="기차역">
-                        🚆 기차역
-                      </option>
-
-                      <option value="공항">
-                        ✈️ 공항
-                      </option>
-
-                      <option value="버스터미널">
-                        🚌 버스터미널
-                      </option>
-
-                      <option value="기타">
-                        📍 기타
-                      </option>
-
-                    </select>
+                      disabled={!arrivalSido || !arrivalSigungu}
+                      className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-sky-500 disabled:bg-gray-100 disabled:text-gray-400"
+                    />
+                    <datalist id="departure-place-options">
+                      {(recommendedPlacesByRegion[arrivalSido] || []).map(
+                        (place) => (
+                          <option key={place} value={place} />
+                        )
+                      )}
+                    </datalist>
+                    <p className="mt-2 text-xs text-gray-400">
+                      여행 종료 장소와 별개로 선택할 수 있어요. 목록에 없으면 직접 입력하세요.
+                    </p>
 
                   </div>
 
 
-                  {/* 출발 시간 */}
+                  {/* 여행 종료 시간 */}
                   <div>
 
                     <label className="mb-2 block text-sm font-semibold text-gray-700">
-                      출발 시간
+                      여행 종료 시간
                     </label>
 
                     <div className="flex gap-2">

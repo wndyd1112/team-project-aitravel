@@ -4,12 +4,15 @@ import Start from "./pages/Start"
 import Home from "./pages/Home"
 import Result from "./pages/Result"
 import Confirmed from "./pages/Confirmed"
+import { createTravelPlan } from "./api/travel"
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [step, setStep] = useState(0)
   const [travelData, setTravelData] = useState(null)
   const [confirmed, setConfirmed] = useState(false)
+  const [isGenerating, setIsGenerating] = useState(false)
+const [apiError, setApiError] = useState("")
 
   // 화면이 바뀔 때 항상 맨 위로 이동
   useEffect(() => {
@@ -39,7 +42,7 @@ function App() {
           </button>
 
           <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold">
-            O
+            AI
           </div>
 
           <button
@@ -192,13 +195,47 @@ function App() {
           />
       )}
   {step === 1 && (
-    <Home
-      onCreatePlan={(data) => {
-        setTravelData(data)
-        setStep(2)
-        setConfirmed(false)
-      }}
-    />
+    <>
+      <Home
+        onCreatePlan={async (data) => {
+          setIsGenerating(true)
+          setApiError("")
+
+          try {
+            // 여행 정보를 백엔드로 전송
+            const result = await createTravelPlan(data)
+
+            // 입력 정보와 백엔드 응답 저장
+            setTravelData({
+              ...data,
+              apiResponse: result,
+            })
+
+            setStep(2)
+            setConfirmed(false)
+          } catch (error) {
+            console.error("여행 계획 생성 오류:", error)
+            setApiError(
+              error.message || "여행 계획 생성에 실패했습니다."
+            )
+          } finally {
+            setIsGenerating(false)
+          }
+        }}
+      />
+
+      {isGenerating && (
+        <p className="p-4 text-center text-blue-600">
+          여행 계획을 생성하고 있습니다...
+        </p>
+      )}
+
+      {apiError && (
+        <p className="p-4 text-center text-red-600">
+          {apiError}
+        </p>
+      )}
+    </>
   )}
 
   {step === 2 && !confirmed && (
